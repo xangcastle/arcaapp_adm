@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">Arca_Adm</string>
+    <string name="title_home">Inicio</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Emitir Descuento</string>
+    <string name="title_activity_login">Inicio de Sesion</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Usuario</string>
+    <string name="prompt_password">Contraseña</string>
+    <string name="action_sign_in">Iniciar sesión</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">Usuario es muy corto</string>
+    <string name="error_invalid_password">Contraseña es muy corta</string>
+    <string name="error_incorrect_password">Contraseña es incorrecta</string>
+    <string name="error_field_required">Este campo es requerido</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="cargando_label">Cargando...</string>
+    <string name="cupones_de_descuento_label">Cupones de descuento</string>
+    <string name="perfil_label">Perfil</string>
+    <string name="cerrar_sesion_label">Cerrar sesión</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="espere_label">Espere un momento...</string>
+    <string name="descuento_a_aplicar_label">Descuento a aplicar</string>
+</resources>
