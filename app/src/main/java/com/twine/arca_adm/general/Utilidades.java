@@ -24,6 +24,7 @@ import com.google.zxing.common.BitMatrix;
 import com.squareup.picasso.Picasso;
 import com.twine.arca_adm.LoginActivity_;
 import com.twine.arca_adm.R;
+import com.twine.arca_adm.models.Cupon;
 import com.twine.arca_adm.models.Descuento;
 import com.twine.arca_adm.models.Empleado;
 
@@ -31,7 +32,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,8 +49,9 @@ public class Utilidades {
     public final static int BLACK = 0xFF000000;
     public final static int WIDTH = 400;
     public final static int HEIGHT = 400;
+    public final static String BASE_URL="http://192.168.0.38:8000";
     //public final static String BASE_URL="http://demos.deltacopiers.com";
-    public final static String BASE_URL="http://192.168.232.1:8000";
+    //public final static String BASE_URL="http://192.168.232.1:8000";
 
     public static boolean is_autenticado(){
         Empleado empleado=new Select().from(Empleado.class).where("activo=?",true).executeSingle();
@@ -158,8 +163,81 @@ public class Utilidades {
 
             return repuesta;
         }
+        public static boolean saveCupones(String strJson){
+            Boolean haynuevos=false;
+            try {
+                JSONObject jrespuesta=new JSONObject(strJson);
+                if(jrespuesta.getInt("code")==200){
+                    JSONArray jcupones = jrespuesta.getJSONArray("cupones");
+
+                    for (int i = 0; i < jcupones.length(); i++) {
+                        JSONObject jcupon = jcupones.getJSONObject(i);
+                        Empleado empleado = new Select().from(Empleado.class)
+                                .where("id_empleado=?",jcupon.getJSONObject("creado_por").getInt("id"))
+                                .executeSingle();
+                        if (empleado==null)
+                            empleado=new Empleado();
+                        empleado.id_empleado=jcupon.getJSONObject("creado_por").getInt("id");
+                        empleado.nombre=jcupon.getJSONObject("creado_por").getString("nombre");
+                        empleado.save();
+
+                        Descuento descuento = new Select().from(Descuento.class)
+                                .where("id_descuento=?",jcupon.getInt("id_descuento"))
+                                .executeSingle();
+
+                        if(descuento!=null && empleado!=null){
+                            Cupon cupon = new Select().from(Cupon.class)
+                                    .where("id_cupon=?",jcupon.getInt("id"))
+                                    .executeSingle();
+                            Boolean isnew=false;
+                            if (cupon==null) {
+                                cupon = new Cupon();
+                                isnew=true;
+                            }
+                            cupon.id_cupon=jcupon.getInt("id");
+                            cupon.codigo=jcupon.getString("codigo");
+                            cupon.canjeado=jcupon.getBoolean("canjeado");
+                            try {
+                                cupon.creado=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
+                                        .parse(jcupon.getString("creado")) ;
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            cupon.creado_por=empleado;
+                            cupon.descuento=descuento;
+                            cupon.save();
+                            if(isnew) {
+                                haynuevos=true;
+                            }
+                        }
+                    }
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return haynuevos;
+        }
         public static List<Descuento> getDescuentos(){
             return new Select().from(Descuento.class).execute();
+        }
+        public static List<Cupon> getCupones(){
+            return new Select().from(Cupon.class)
+                    .orderBy("creado desc")
+                    .execute();
+        }
+        public static List<Cupon> getCuponesPorFecha(Date fecha){
+            List<Cupon> cupones = new ArrayList<>();
+            SimpleDateFormat formato=new SimpleDateFormat("dd/MM/yyyy");
+            List<Cupon> cuponesFiltro= new Select().from(Cupon.class)
+                    .orderBy("creado desc")
+                    .execute();
+            for (Cupon cupon:cuponesFiltro){
+                if(formato.format(cupon.creado).equals(formato.format(fecha))){
+                    cupones.add(cupon);
+                }
+            }
+            return cupones;
         }
     }
     public static final int PERMISIONS_REQUEST = 12;

@@ -1,6 +1,7 @@
 package com.twine.arca_adm;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -8,11 +9,16 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -22,6 +28,8 @@ import android.widget.Toast;
 import com.google.zxing.WriterException;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.twine.arca_adm.adapters.CuponAdapter;
+import com.twine.arca_adm.adapters.DividerItemDecoration;
 import com.twine.arca_adm.general.Utilidades;
 import com.twine.arca_adm.models.Cupon;
 import com.twine.arca_adm.models.Descuento;
@@ -38,10 +46,13 @@ import org.androidannotations.rest.spring.annotations.RestService;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 
 @EFragment
@@ -64,11 +75,35 @@ public class DescuentosFragment extends Fragment {
     ImageView imageView;
     @ViewById(R.id.containerCupon)
     LinearLayout containerCupon;
+    @ViewById(R.id.editFecha)
+    TextView editFecha;
+    @ViewById(R.id.txtCantidad)
+    TextView txtCantidad;
+    @ViewById(R.id.recyclerView)
+    RecyclerView recyclerView;
+    @ViewById(R.id.swipeRefresh)
+    SwipeRefreshLayout refreshLayout;
+    @Bean
+    CuponAdapter adapter;
 
     List<Descuento> descuentos;
     Descuento descuento;
 
-    List<Cupon> cupons;
+    List<Cupon> cupones;
+    Calendar myCalendar = Calendar.getInstance();
+    DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear,
+                              int dayOfMonth) {
+            // TODO Auto-generated method stub
+            myCalendar.set(Calendar.YEAR, year);
+            myCalendar.set(Calendar.MONTH, monthOfYear);
+            myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            setFechaLabel(myCalendar.getTime());
+        }
+
+    };
 
     public DescuentosFragment() {
         // Required empty public constructor
@@ -85,12 +120,29 @@ public class DescuentosFragment extends Fragment {
                              Bundle savedInstanceState) {
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         restClient.setRestErrorHandler(myErrorhandler);
-        // Inflate the layout for this fragment
+        setFechaLabel(Calendar.getInstance().getTime());
         return inflater.inflate(R.layout.fragment_descuentos, container, false);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        descargarCupones();
+    }
 
-
+    @Click(R.id.editFecha)
+    void editFechaClick(){
+        new DatePickerDialog(getContext(), date, myCalendar
+                .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+    }
+    @UiThread
+    void setFechaLabel(Date fecha){
+        String myFormat = "dd/MM/yyyy"; //In which you need put here
+        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+        editFecha.setText(sdf.format(fecha));
+        refrescarListaCupones();
+    }
     @Click(R.id.fab)
     void nuevoDescuentoClick(){
         showProgressDialog();
@@ -104,7 +156,6 @@ public class DescuentosFragment extends Fragment {
         Intent scanIntent=integrator.createScanIntent();
         startActivityForResult(scanIntent,IntentIntegrator.REQUEST_CODE);
     }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(IntentIntegrator.REQUEST_CODE==requestCode && (resultCode == Activity.RESULT_OK)){
@@ -167,6 +218,62 @@ public class DescuentosFragment extends Fragment {
         showMaster(true);
         cargarSpinnerDescuentos();
         hideProgressDialog();
+    }
+
+    @Background
+    void descargarCupones(){
+        Empleado empleado= Utilidades.db.get_empleado();
+        String respuesta =  restClient.get_cupones_empleado(
+                String.valueOf(empleado.id_empleado));
+        Utilidades.db.saveCupones(respuesta);
+        refrescarListaCupones();
+    }
+    @UiThread
+    void refrescarListaCupones(){
+        if(recyclerView.getAdapter()==null){
+            adapter=new CuponAdapter(getContext());
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(
+                    getContext(),
+                    LinearLayoutManager.VERTICAL,
+                    false);
+            recyclerView.setLayoutManager(layoutManager);
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL));
+            recyclerView.setAdapter(adapter);
+            recyclerView.setHasFixedSize(true);
+            refreshLayout.setOnRefreshListener(
+                    new SwipeRefreshLayout.OnRefreshListener() {
+                        @Override
+                        public void onRefresh() {
+                            descargarCupones();
+                        }
+                    }
+            );
+            refreshLayout.setColorSchemeResources(
+                    R.color.blue_800,
+                    R.color.purple_600,
+                    R.color.orange_800,
+                    R.color.lime_A800
+            );
+        }
+        if(editFecha.getText().length()>0){
+            try {
+                Date fecha = new SimpleDateFormat("dd/MM/yyyy").parse(editFecha.getText().toString());
+                cupones = Utilidades.db.getCuponesPorFecha(fecha);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+        }else
+            cupones = Utilidades.db.getCupones();
+
+
+        adapter.clear();
+        adapter.addAll(cupones);
+        if(refreshLayout!=null)
+            refreshLayout.setRefreshing(false);
+        if(txtCantidad!=null)
+            txtCantidad.setText(String.valueOf(cupones.size()));
     }
 
     private void cargarSpinnerDescuentos(){
