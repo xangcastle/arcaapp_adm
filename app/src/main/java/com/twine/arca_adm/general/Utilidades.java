@@ -49,8 +49,8 @@ public class Utilidades {
     public final static int BLACK = 0xFF000000;
     public final static int WIDTH = 400;
     public final static int HEIGHT = 400;
-    public final static String BASE_URL="http://192.168.0.38:8000";
-    //public final static String BASE_URL="http://demos.deltacopiers.com";
+    //public final static String BASE_URL="http://192.168.0.38:8000";
+    public final static String BASE_URL="http://demos.deltacopiers.com";
     //public final static String BASE_URL="http://192.168.232.1:8000";
 
     public static boolean is_autenticado(){
