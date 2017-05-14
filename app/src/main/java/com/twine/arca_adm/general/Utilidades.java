@@ -16,7 +16,9 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
+import com.activeandroid.query.Update;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
@@ -24,9 +26,11 @@ import com.google.zxing.common.BitMatrix;
 import com.squareup.picasso.Picasso;
 import com.twine.arca_adm.LoginActivity_;
 import com.twine.arca_adm.R;
+import com.twine.arca_adm.models.Comercio;
 import com.twine.arca_adm.models.Cupon;
 import com.twine.arca_adm.models.Descuento;
 import com.twine.arca_adm.models.Empleado;
+import com.twine.arca_adm.models.Factura;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,8 +53,8 @@ public class Utilidades {
     public final static int BLACK = 0xFF000000;
     public final static int WIDTH = 400;
     public final static int HEIGHT = 400;
-    //public final static String BASE_URL="http://192.168.0.38:8000";
-    public final static String BASE_URL="http://demos.deltacopiers.com";
+    public final static String BASE_URL="http://192.168.1.2:8000";
+    //public final static String BASE_URL="http://demos.deltacopiers.com";
     //public final static String BASE_URL="http://192.168.232.1:8000";
 
     public static boolean is_autenticado(){
@@ -59,6 +63,18 @@ public class Utilidades {
             return true;
         else
             return false;
+    }
+    public static void log_out(Context context){
+        limpiarTodo();
+        context.startActivity(new Intent(context, LoginActivity_.class));
+        ((Activity) context).finish();
+    }
+    public static void limpiarTodo(){
+        new Delete().from(Factura.class).execute();
+        new Delete().from(Cupon.class).execute();
+        new Delete().from(Descuento.class).execute();
+        new Delete().from(Comercio.class).execute();
+        new Delete().from(Empleado.class).execute();
     }
     public static Boolean atuenticado_o_redirect(Context context){
         if (!is_autenticado()){
@@ -215,21 +231,70 @@ public class Utilidades {
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
+            } catch (Exception e){
+                e.printStackTrace();
             }
             return haynuevos;
+        }
+        public static boolean saveFacturas(String strJson){
+            Boolean compleatado=true;
+            try {
+                JSONObject jrespuesta=new JSONObject(strJson);
+                if(jrespuesta.getInt("code")==200){
+                    JSONArray jcupones = jrespuesta.getJSONArray("facturas");
+
+                    for (int i = 0; i < jcupones.length(); i++) {
+                        JSONObject jfactura = jcupones.getJSONObject(i);
+                        Cupon cupon= new Select().from(Cupon.class)
+                                .where("id_cupon=?",jfactura.getInt("cupon_id"))
+                                .executeSingle();
+
+                        if (cupon==null)
+                            continue;
+                        Comercio comercio=get_empleado().comercio;
+                        Factura factura=new Select().from(Factura.class)
+                                .where("id_factura=?",jfactura.getInt("id"))
+                                .executeSingle();
+                        if(factura==null)
+                            factura=new Factura();
+                        factura.id_factura=jfactura.getInt("id");
+                        factura.comercio=comercio;
+                        factura.cupon=cupon;
+                        factura.monto=jfactura.getDouble("monto");
+                        factura.descuento=jfactura.getDouble("descuento");
+                        try {
+                            factura.fecha=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
+                                    .parse(jfactura.getString("fecha")) ;
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        cupon.canjeado=true;
+                        cupon.save();
+                        factura.save();
+                    }
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+            return compleatado;
         }
         public static List<Descuento> getDescuentos(){
             return new Select().from(Descuento.class).execute();
         }
-        public static List<Cupon> getCupones(){
+        public static List<Cupon> getCupones(boolean canjeado){
             return new Select().from(Cupon.class)
+                    .where("canjeado=?",canjeado)
                     .orderBy("creado desc")
                     .execute();
         }
-        public static List<Cupon> getCuponesPorFecha(Date fecha){
+        public static List<Cupon> getCuponesPorFecha(Date fecha, boolean canjeado){
             List<Cupon> cupones = new ArrayList<>();
             SimpleDateFormat formato=new SimpleDateFormat("dd/MM/yyyy");
             List<Cupon> cuponesFiltro= new Select().from(Cupon.class)
+                    .where("canjeado=?",canjeado)
                     .orderBy("creado desc")
                     .execute();
             for (Cupon cupon:cuponesFiltro){
@@ -238,6 +303,16 @@ public class Utilidades {
                 }
             }
             return cupones;
+        }
+        public static List<Cupon> getCuponesPendientesCarga() {
+            return new Select().from(Cupon.class)
+                    .where("id_cupon=?", 0)
+                    .execute();
+        }
+        public static List<Factura> getFacturasPendientesCarga() {
+            return new Select().from(Factura.class)
+                    .where("id_factura=?", 0)
+                    .execute();
         }
     }
     public static final int PERMISIONS_REQUEST = 12;

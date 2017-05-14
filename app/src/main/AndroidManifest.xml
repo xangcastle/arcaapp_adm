@@ -27,7 +27,11 @@
             android:value="1" />
         <meta-data
             android:name="AA_MODELS"
-            android:value="com.twine.arca_adm.models.Empleado,             com.twine.arca_adm.models.Comercio,             com.twine.arca_adm.models.Descuento,             com.twine.arca_adm.models.Cupon" />
+            android:value="com.twine.arca_adm.models.Empleado,
+            com.twine.arca_adm.models.Comercio,
+            com.twine.arca_adm.models.Descuento,
+            com.twine.arca_adm.models.Cupon,
+            com.twine.arca_adm.models.Factura" />
 
         <activity
             android:name=".MainActivity_"

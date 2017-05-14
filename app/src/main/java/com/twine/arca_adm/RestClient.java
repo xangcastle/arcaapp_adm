@@ -28,6 +28,9 @@ public interface RestClient extends RestClientErrorHandling, RestClientHeaders {
     @Get("/arca/get_cupones_empleado/?id_empleado={id_empleado}")
     String get_cupones_empleado(@Path String id_empleado);
 
+    @Get("/arca/get_facturas_empleado/?id_empleado={id_empleado}")
+    String get_facturas_empleado(@Path String id_empleado);
+
     @Get("/arca/generar_cupon/?descuento={descuento}&id_empleado={id_empleado}")
     String generar_cupon(@Path String descuento, @Path String id_empleado);
 
@@ -37,4 +40,12 @@ public interface RestClient extends RestClientErrorHandling, RestClientHeaders {
                       @Field String codigo_usuario,
                       @Field String codigo,
                       @Field String creado);
+
+    @Post("/arca/canjear_cupon/")
+        String canjear_cupon(@Field String codigo_cupon,
+                         @Field String factura,
+                         @Field String monto,
+                         @Field String descuento,
+                         @Field String actualizado,
+                         @Field String id_empleado);
 }
