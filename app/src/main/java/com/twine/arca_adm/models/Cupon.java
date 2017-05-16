@@ -31,6 +31,12 @@ public class Cupon extends Model {
     @Column(name = "actualizado_por")
     public Empleado actualizado_por;
 
+    public Date fecha_vence(){
+        Calendar day = Calendar.getInstance();
+        day.setTime(this.creado);
+        day.add(Calendar.DAY_OF_MONTH, descuento.vigencia);
+        return day.getTime();
+    }
     public long vence_en(){
         try{
             Calendar day = Calendar.getInstance();
@@ -43,11 +49,36 @@ public class Cupon extends Model {
         }catch (NullPointerException ex){
             return 0;
         }
-
+    }
+    public long dias_entrega(){
+        try{
+            Calendar day = Calendar.getInstance();
+            long diff =  this.creado.getTime() - day.getTime().getTime();
+            long segundos = diff / 1000;
+            long minutos = segundos / 60;
+            long horas = minutos / 60;
+            long dias = horas / 24;
+            return dias;
+        }catch (NullPointerException ex){
+            return 0;
+        }
+    }
+    public long dias_canje(){
+        try{
+            Calendar day = Calendar.getInstance();
+            long diff = this.actualizado.getTime() - day.getTime().getTime() ;
+            long segundos = diff / 1000;
+            long minutos = segundos / 60;
+            long horas = minutos / 60;
+            long dias = horas / 24;
+            return dias;
+        }catch (NullPointerException ex){
+            return 0;
+        }
     }
     public boolean esValido(){
         long vencimiento=vence_en();
-        if(vencimiento<0)
+        if(vencimiento<0 || canjeado)
             return false;
         else
             return true;
@@ -67,5 +98,14 @@ public class Cupon extends Model {
                 return this.descuento.desc_compra_minima_porc_inf;
         }else //SI NO QUEDA EN NINGUNA CONDICION PRO DEFECTO SE ENNVIA EL DESCUENTO GENERAL
             return this.descuento.porcentaje_descuento;
+    }
+
+    public String estado(){
+        if(canjeado){
+            return "Canjeado";
+        }else if(esValido()){
+            return "No canjeado";
+        }else
+            return "Vencido";
     }
 }

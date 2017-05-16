@@ -39,6 +39,7 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -53,8 +54,8 @@ public class Utilidades {
     public final static int BLACK = 0xFF000000;
     public final static int WIDTH = 400;
     public final static int HEIGHT = 400;
-    public final static String BASE_URL="http://192.168.1.2:8000";
-    //public final static String BASE_URL="http://demos.deltacopiers.com";
+    //public final static String BASE_URL="http://192.168.1.13:8000";
+    public final static String BASE_URL="http://demos.deltacopiers.com";
     //public final static String BASE_URL="http://192.168.232.1:8000";
 
     public static boolean is_autenticado(){
@@ -73,8 +74,8 @@ public class Utilidades {
         new Delete().from(Factura.class).execute();
         new Delete().from(Cupon.class).execute();
         new Delete().from(Descuento.class).execute();
-        new Delete().from(Comercio.class).execute();
         new Delete().from(Empleado.class).execute();
+        new Delete().from(Comercio.class).execute();
     }
     public static Boolean atuenticado_o_redirect(Context context){
         if (!is_autenticado()){
@@ -216,9 +217,14 @@ public class Utilidades {
                             try {
                                 cupon.creado=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
                                         .parse(jcupon.getString("creado")) ;
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
+                            } catch (ParseException e) {e.printStackTrace();}
+                            catch (Exception e){e.printStackTrace();}
+                            try {
+                                cupon.actualizado=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
+                                        .parse(jcupon.getString("actualizado")) ;
+                            }catch (ParseException e) {e.printStackTrace();}
+                            catch (Exception e){e.printStackTrace();}
+
                             cupon.creado_por=empleado;
                             cupon.descuento=descuento;
                             cupon.save();
@@ -314,6 +320,48 @@ public class Utilidades {
                     .where("id_factura=?", 0)
                     .execute();
         }
+        public static List<Factura> getFacturasxMesAnio(int mes, int anio) {
+            Calendar cal= Calendar.getInstance();
+            cal.set(Calendar.YEAR,anio);
+            cal.set(Calendar.MONTH,mes);
+            cal.set(Calendar.DAY_OF_MONTH,1);
+
+            Calendar cal2= Calendar.getInstance();
+            cal2.set(Calendar.YEAR,anio);
+            cal2.set(Calendar.MONTH,mes);
+            cal2.set(Calendar.DAY_OF_MONTH,cal2.getMaximum(Calendar.DAY_OF_MONTH));
+
+            return new Select().from(Factura.class)
+                    .where("fecha>= ?", cal.getTime().getTime())
+                    .where("fecha<= ?", cal2.getTime().getTime())
+                    .execute();
+        }
+        public static List<Cupon> getCuponesxMesAnio(int mes, int anio) {
+            Calendar cal= Calendar.getInstance();
+            cal.set(Calendar.YEAR,anio);
+            cal.set(Calendar.MONTH,mes);
+            cal.set(Calendar.DAY_OF_MONTH,1);
+
+            Calendar cal2= Calendar.getInstance();
+            cal2.set(Calendar.YEAR,anio);
+            cal2.set(Calendar.MONTH,mes);
+            cal2.set(Calendar.DAY_OF_MONTH,cal2.getMaximum(Calendar.DAY_OF_MONTH));
+
+            return new Select().from(Cupon.class)
+                    .where("creado>= ?", cal.getTime().getTime())
+                    .where("creado<= ?", cal2.getTime().getTime())
+                    .execute();
+        }
+        public static List<Cupon> getCuponesxPotenciales() {
+            List<Cupon>cupones= new Select().from(Cupon.class)
+                    .execute();
+            List<Cupon> cupones_repuesta=new ArrayList<>();
+            for (Cupon cupon:cupones) {
+                if(cupon.esValido())
+                    cupones_repuesta.add(cupon);
+            }
+            return cupones_repuesta;
+        }
     }
     public static final int PERMISIONS_REQUEST = 12;
     public static void checkPermision(Context context) {
@@ -350,5 +398,16 @@ public class Utilidades {
                     requestedPermissionsGranted.toArray(new String[] {}),
                     PERMISIONS_REQUEST);
         }
+    }
+    public static Date getDate(int year, int month, int day) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, year);
+        cal.set(Calendar.MONTH, month);
+        cal.set(Calendar.DAY_OF_MONTH, day);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
     }
 }

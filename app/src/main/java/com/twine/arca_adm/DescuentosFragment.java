@@ -167,6 +167,7 @@ public class DescuentosFragment extends Fragment {
     Spinner spinner;
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
         inflater.inflate(R.menu.menu_descuentos, menu);
         MenuItem item = menu.findItem(R.id.spinner);
         spinner = (Spinner) MenuItemCompat.getActionView(item); // get the spinner
@@ -672,16 +673,19 @@ public class DescuentosFragment extends Fragment {
         try{
             switch (layou){
                 case PRINCIPAL: {
-                    LayautDetalle.setVisibility(View.GONE);
                     LayoutMaster.setVisibility(View.VISIBLE);
+                    LayautDetalle.setVisibility(View.GONE);
+                    LayautDetalleCanje.setVisibility(View.GONE);
                     break;
                 }case NUEVO_DESCUENTO:{
                     LayautDetalle.setVisibility(View.VISIBLE);
                     LayoutMaster.setVisibility(View.GONE);
+                    LayautDetalleCanje.setVisibility(View.GONE);
                     break;
                 }case CANJEAR_DESCUENTO:{
-                    LayoutMaster.setVisibility(View.GONE);
                     LayautDetalleCanje.setVisibility(View.VISIBLE);
+                    LayoutMaster.setVisibility(View.GONE);
+                    LayautDetalle.setVisibility(View.GONE);
                     factura_canje=null;
                     break;
                 }

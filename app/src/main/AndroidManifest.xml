@@ -37,7 +37,7 @@
             android:name=".MainActivity_"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.Dark.ActionBar">
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -47,7 +47,7 @@
         <activity
             android:name=".LoginActivity_"
             android:label="@string/title_activity_login"
-            android:theme="@style/AppTheme.Dark" />
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

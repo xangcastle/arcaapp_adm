@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Arca_Adm</string>
+    <string name="app_name">Arca</string>
     <string name="title_home">Inicio</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Emitir Descuento</string>
