@@ -31,7 +31,8 @@
             com.twine.arca_adm.models.Comercio,
             com.twine.arca_adm.models.Descuento,
             com.twine.arca_adm.models.Cupon,
-            com.twine.arca_adm.models.Factura" />
+            com.twine.arca_adm.models.Factura,
+            com.twine.arca_adm.models.Registro" />
 
         <activity
             android:name=".MainActivity_"

@@ -42,10 +42,16 @@ public interface RestClient extends RestClientErrorHandling, RestClientHeaders {
                       @Field String creado);
 
     @Post("/arca/canjear_cupon/")
-        String canjear_cupon(@Field String codigo_cupon,
-                         @Field String factura,
-                         @Field String monto,
-                         @Field String descuento,
-                         @Field String actualizado,
-                         @Field String id_empleado);
+    String canjear_cupon(@Field String codigo_cupon,
+                     @Field String factura,
+                     @Field String monto,
+                     @Field String descuento,
+                     @Field String actualizado,
+                     @Field String id_empleado);
+
+    @Post("/agregar_registro/")
+    String agregar_registro(@Field String tag,
+                            @Field String mensaje,
+                            @Field String fecha,
+                            @Field String usuario);
 }

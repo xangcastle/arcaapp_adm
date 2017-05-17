@@ -17,10 +17,21 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.twine.arca_adm.general.ErrorReporter;
 import com.twine.arca_adm.general.Utilidades;
+import com.twine.arca_adm.models.Empleado;
+import com.twine.arca_adm.models.Registro;
 
+import org.androidannotations.annotations.Background;
+import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
+import org.androidannotations.rest.spring.annotations.RestService;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.List;
 
 @EActivity
 public class MainActivity extends AppCompatActivity implements
@@ -29,6 +40,11 @@ public class MainActivity extends AppCompatActivity implements
         PerfilFragment.OnFragmentInteractionListener{
     @ViewById(R.id.content)
     FrameLayout content;
+
+    @RestService
+    RestClient restClient;
+    @Bean
+    MyRestErrorHandler myErrorhandler;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -71,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        restClient.setRestErrorHandler(myErrorhandler);
         if(Utilidades.atuenticado_o_redirect(this)){
             Utilidades.checkPermision(MainActivity.this);
             BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
@@ -84,6 +101,12 @@ public class MainActivity extends AppCompatActivity implements
             fm.executePendingTransactions();
         }
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        cargarRegistros();
     }
 
     @Override
@@ -137,5 +160,33 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+    @Background
+    void cargarRegistros(){
+        final ErrorReporter reporter = ErrorReporter.getInstance();
+        reporter.Init(this);
+        if (reporter.bIsThereAnyErrorFile()) {
+            reporter.CheckErrorAndSend(this);
+        }
+        List<Registro> registros=Utilidades.db.get_registros_sin_cargar();
+        Empleado empleado=Utilidades.db.get_empleado();
+        for (Registro registro:registros) {
+            String respuesta = restClient.agregar_registro("arca_adm",
+                    registro.registro,
+                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(registro.fecha),
+                    "Comercio: " + empleado.comercio.nombre + " Empleado: " + empleado.id_empleado
+            );
+            if(respuesta!=null){
+                try {
+                    JSONObject jrespuesta=new JSONObject(respuesta);
+                    if(jrespuesta.getInt("code")==200){
+                        registro.cargado=true;
+                        registro.save();
+                    }
+                } catch (JSONException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
     }
 }

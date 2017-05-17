@@ -31,6 +31,7 @@ import com.twine.arca_adm.models.Cupon;
 import com.twine.arca_adm.models.Descuento;
 import com.twine.arca_adm.models.Empleado;
 import com.twine.arca_adm.models.Factura;
+import com.twine.arca_adm.models.Registro;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -133,6 +134,11 @@ public class Utilidades {
     }
 
     public static class db{
+        public static List<Registro> get_registros_sin_cargar(){
+            List<Registro> registros=new Select().from(Registro.class)
+                    .where("cargado=?",false).execute();
+            return registros;
+        }
         public static Empleado get_empleado(){
             return new Select().from(Empleado.class).where("activo=?",true).executeSingle();
         }
