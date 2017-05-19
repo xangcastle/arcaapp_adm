@@ -2,6 +2,7 @@ package com.twine.arca_adm.general;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -25,6 +26,7 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.squareup.picasso.Picasso;
 import com.twine.arca_adm.LoginActivity_;
+import com.twine.arca_adm.MainActivity;
 import com.twine.arca_adm.R;
 import com.twine.arca_adm.models.Comercio;
 import com.twine.arca_adm.models.Cupon;
@@ -132,7 +134,18 @@ public class Utilidades {
     public static  void cargarImageView(ImageView imageView, Bitmap bitmap) {
         imageView.setImageBitmap(bitmap);
     }
+    public static void motrarDialogoOK(Context context, String Titulo, String Mensaje){
+        final android.app.AlertDialog.Builder dialog = new android.app.AlertDialog.Builder(context);
+        dialog.setTitle(Titulo);
+        dialog.setMessage(Mensaje);
+        dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        dialog.show();
+    }
     public static class db{
         public static List<Registro> get_registros_sin_cargar(){
             List<Registro> registros=new Select().from(Registro.class)
@@ -202,6 +215,7 @@ public class Utilidades {
                             empleado=new Empleado();
                         empleado.id_empleado=jcupon.getJSONObject("creado_por").getInt("id");
                         empleado.nombre=jcupon.getJSONObject("creado_por").getString("nombre");
+                        empleado.apellido=jcupon.getJSONObject("creado_por").getString("apellido");
                         empleado.save();
 
                         Descuento descuento = new Select().from(Descuento.class)
@@ -221,6 +235,7 @@ public class Utilidades {
                             cupon.codigo=jcupon.getString("codigo");
                             cupon.canjeado=jcupon.getBoolean("canjeado");
                             try {
+                                cupon.creado_por=empleado;
                                 cupon.creado=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
                                         .parse(jcupon.getString("creado")) ;
                             } catch (ParseException e) {e.printStackTrace();}
@@ -231,7 +246,24 @@ public class Utilidades {
                             }catch (ParseException e) {e.printStackTrace();}
                             catch (Exception e){e.printStackTrace();}
 
-                            cupon.creado_por=empleado;
+                            if(jcupon.has("actualizado_por")){
+                                try{
+                                    JSONObject jempleado_actualiza=
+                                            jcupon.getJSONArray("actualizado_por").getJSONObject(0);
+
+                                    Empleado empleado_actualiza=new Select().from(Empleado.class)
+                                            .where("id_empleado=?",jempleado_actualiza.getInt("id"))
+                                            .executeSingle();
+                                    if(empleado_actualiza==null)
+                                        empleado_actualiza=new Empleado();
+                                    empleado_actualiza.id_empleado=jempleado_actualiza.getInt("id");
+                                    empleado_actualiza.nombre=jempleado_actualiza.getString("nombre");
+                                    empleado_actualiza.apellido=jempleado_actualiza.getString("apellido");
+                                    empleado_actualiza.save();
+                                    cupon.actualizado_por=empleado_actualiza;
+                                } catch (Exception e){e.printStackTrace();}
+                            }
+
                             cupon.descuento=descuento;
                             cupon.save();
                             if(isnew) {
@@ -342,7 +374,41 @@ public class Utilidades {
                     .where("fecha<= ?", cal2.getTime().getTime())
                     .execute();
         }
+        public static List<Factura> getFacturasxDiasMes_Empleado(int mes, int anio, int dia,
+                                                                 Empleado empleado) {
+
+            Calendar cal= Calendar.getInstance();
+            cal.setTime(Utilidades.getDate(anio,mes,1));
+
+            Calendar cal2= Calendar.getInstance();
+            cal2.setTime(Utilidades.getDate(anio,mes,1));
+            cal2.add(Calendar.MONTH,1);
+
+            List<Factura> facturas = new Select().from(Factura.class).innerJoin(Cupon.class)
+                    .on("facturas.pk_cupon=cupones.id")
+                    .where("fecha>= ?", cal.getTime().getTime())
+                    .where("fecha< ?", cal2.getTime().getTime())
+                    .where("actualizado_por=?",empleado.getId())
+                    .execute();
+            return  facturas;
+        }
         public static List<Cupon> getCuponesxMesAnio(int mes, int anio) {
+            Calendar cal= Calendar.getInstance();
+            cal.set(Calendar.YEAR,anio);
+            cal.set(Calendar.MONTH,mes);
+            cal.set(Calendar.DAY_OF_MONTH,1);
+
+            Calendar cal2= Calendar.getInstance();
+            cal2.set(Calendar.YEAR,anio);
+            cal2.set(Calendar.MONTH,mes);
+            cal2.set(Calendar.DAY_OF_MONTH,cal2.getMaximum(Calendar.DAY_OF_MONTH));
+
+            return new Select().from(Cupon.class)
+                    .where("creado>= ?", cal.getTime().getTime())
+                    .where("creado<= ?", cal2.getTime().getTime())
+                    .execute();
+        }
+        public static List<Cupon> getCuponesxMesAnioEmpleado(int mes, int anio, Empleado empleado) {
             Calendar cal= Calendar.getInstance();
             cal.set(Calendar.YEAR,anio);
             cal.set(Calendar.MONTH,mes);

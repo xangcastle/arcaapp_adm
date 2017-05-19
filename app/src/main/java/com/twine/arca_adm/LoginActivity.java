@@ -377,6 +377,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 empleado.apellido=jempleado.getString("apellido");
                 empleado.direccion=jempleado.getString("direccion");
                 empleado.telefono=jempleado.getString("telefono");
+                empleado.usuario=username;
+                empleado.clave=password;
                 JSONObject jcomercio = jempleado.getJSONObject("comercio");
                 Comercio comercio = new Select().from(Comercio.class)
                         .where("id_comercio=?", jcomercio.get("id"))

@@ -28,4 +28,5 @@
     <string name="espere_label">Espere un momento...</string>
     <string name="descuento_a_aplicar_label">Descuento a aplicar</string>
     <string name="select_estado_cupon">Estado Cupon</string>
+    <string name="cambiar_contrase_a">Cambiar Contraseña</string>
 </resources>

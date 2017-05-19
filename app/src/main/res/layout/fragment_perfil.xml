@@ -2,12 +2,210 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.twine.arca_adm.PerfilFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_margin="10dp">
+            <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_margin="5dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Datos generales"
+                    android:gravity="center"/>
+                <android.support.design.widget.TextInputLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent">
+
+                    <EditText
+                        android:id="@+id/nombre"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Nombre" />
+                </android.support.design.widget.TextInputLayout>
+                <android.support.design.widget.TextInputLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent">
+                    <EditText
+                        android:id="@+id/apellido"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Apellido" />
+                </android.support.design.widget.TextInputLayout>
+                <android.support.design.widget.TextInputLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent">
+                    <EditText
+                        android:id="@+id/direccion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Direccion"
+                        android:inputType="textMultiLine"/>
+                </android.support.design.widget.TextInputLayout>
+                <android.support.design.widget.TextInputLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent">
+                    <EditText
+                        android:id="@+id/telefono"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Telefono"
+                        android:inputType="phone"/>
+                </android.support.design.widget.TextInputLayout>
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+            <android.support.v7.widget.CardView
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:background="@color/blanco">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="Cupones expedidos y canjeados"
+                        />
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:layout_margin="5dp"
+                        android:id="@+id/chart_entregado_canjeado"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
+            <android.support.v7.widget.CardView
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:background="@color/blanco">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="Ingresos percibidos por el uso de la aplicación"
+                        />
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:layout_margin="5dp"
+                        android:id="@+id/chart_ingresos"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
+            <android.support.v7.widget.CardView
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:background="@color/blanco">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="Descuentos otorgados a clientes"
+                        />
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:layout_margin="5dp"
+                        android:id="@+id/chart_descuentos"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+            <android.support.v7.widget.CardView
+                android:layout_marginTop="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_margin="5dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Modifica tu contraseña"
+                        android:gravity="center"/>
+                    <android.support.design.widget.TextInputLayout
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent">
+
+                        <EditText
+                            android:id="@+id/contrasenia_actual"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Contraseña actual"
+                            android:inputType="textPassword" />
+                    </android.support.design.widget.TextInputLayout>
+                    <android.support.design.widget.TextInputLayout
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent">
+                        <EditText
+                            android:id="@+id/contrasenia_nueva"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Contraseña nueva"
+                            android:inputType="textPassword"/>
+                    </android.support.design.widget.TextInputLayout>
+                    <android.support.design.widget.TextInputLayout
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent">
+                        <EditText
+                            android:id="@+id/contrasenia_nueva_confir"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Confirmar contraseña"
+                            android:inputType="textPassword"/>
+                    </android.support.design.widget.TextInputLayout>
+
+                    <Button
+                        android:id="@+id/cambiar_contrasenia"
+                        style="?android:textAppearanceSmall"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/cambiar_contrase_a"
+                        android:textStyle="bold"
+                        android:theme="@style/ThemeOverlay.MyDarkButton_blue"/>
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
+
+
 
 </FrameLayout>
